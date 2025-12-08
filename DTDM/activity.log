@@ -62,3 +62,24 @@
 2025-12-07T19:22:43.874Z - INSERT FILE id=6935d40346da2f08946e4ed2 owner=dophudien2a@gmail.com - OK - name=IMG_2747.jpg size=1814715
 2025-12-07T19:22:57.576Z - UPDATE FILE id=6935d40346da2f08946e4ed2 owner=dophudien2a@gmail.com - OK - rename IMG_2747.jpg -> alalkkj
 2025-12-07T19:28:57.020Z - INSERT FOLDER id=6935d57846da2f08946e4ef3 owner=dophudien2a@gmail.com - OK - name=fjjkf
+2025-12-08T10:27:22.437Z - UPDATE FILE id=6936a002c1c0a03daf83cc21 owner=admin1 - OK - visibility=public
+2025-12-08T10:27:39.885Z - UPDATE FILE id=69369fd4c1c0a03daf83cbe2 owner=admin1 - OK - rename Screenshot 2025-11-12 105100.png -> Screenshot 2025-11-12 105100.png
+2025-12-08T10:27:43.353Z - UPDATE FILE id=69369fd4c1c0a03daf83cbe2 owner=admin1 - OK - visibility=public
+2025-12-08T10:27:52.743Z - UPDATE FILE id=69369fd4c1c0a03daf83cbe2 owner=admin1 - OK - visibility=public
+2025-12-08T10:29:59.684Z - UPDATE FILE id=69369fd4c1c0a03daf83cbe2 owner=admin1 - OK - visibility=private
+2025-12-08T10:30:02.637Z - UPDATE FILE id=69369fd4c1c0a03daf83cbe2 owner=admin1 - OK - visibility=public
+2025-12-08T10:30:13.713Z - UPDATE FILE id=69369fd4c1c0a03daf83cbe2 owner=admin1 - OK - visibility=private
+2025-12-08T10:30:19.647Z - UPDATE FILE id=69369fd4c1c0a03daf83cbe2 owner=admin1 - OK - visibility=private
+2025-12-08T10:30:25.618Z - UPDATE FILE id=69369fd4c1c0a03daf83cbe2 owner=admin1 - OK - visibility=public
+2025-12-08T10:30:32.881Z - UPDATE FILE id=69369fd4c1c0a03daf83cbe2 owner=admin1 - OK - visibility=private
+2025-12-08T10:32:31.039Z - UPDATE FILE id=69369fd4c1c0a03daf83cbe2 owner=admin1 - OK - visibility=public
+2025-12-08T10:32:41.857Z - UPDATE FILE id=69369fd4c1c0a03daf83cbe2 owner=admin1 - OK - visibility=private
+2025-12-08T10:33:33.862Z - DELETE FOLDER id=69369fdec1c0a03daf83cbec owner=admin1 - TRASHED - folders=2 files=1
+2025-12-08T10:34:10.038Z - UPDATE FILE id=69369fd4c1c0a03daf83cbe2 owner=admin1 - OK - visibility=public
+2025-12-08T10:37:20.975Z - UPDATE FILE id=69369fd4c1c0a03daf83cbe2 owner=admin1 - OK - visibility=private
+2025-12-08T10:40:39.271Z - DELETE FILE id=69369fe9c1c0a03daf83cbf9 owner=admin1 - PERMANENT - size=26588
+2025-12-08T10:40:50.874Z - DELETE FILE id=69369fd4c1c0a03daf83cbe2 owner=admin1 - TRASHED - name=Screenshot 2025-11-12 105100.png
+2025-12-08T10:40:53.635Z - DELETE FILE id=6936a07ec1c0a03daf83cc2a owner=admin1 - TRASHED - name=qqqq.ipynb
+2025-12-08T10:41:00.224Z - DELETE FILE id=69369fd4c1c0a03daf83cbe2 owner=admin1 - PERMANENT - size=83202
+2025-12-08T10:44:42.956Z - RESTORE FILE id=6936a07ec1c0a03daf83cc2a owner=admin1 - OK
+2025-12-08T10:59:20.908Z - INSERT FILE id=6936af88e00d39f1f5fa715d owner=admin1 - OK - name=hinh-nen-desktop-3.jpg size=155498
