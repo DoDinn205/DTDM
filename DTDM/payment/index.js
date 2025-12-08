@@ -17,7 +17,7 @@ router.post("/purchase", requireAuth, async (req, res) => {
     const requestId = partnerCode + Date.now();
     const orderId = requestId;
 
-    const redirectUrl = `http://52.76.57.239/payment/success`;
+    const redirectUrl = `http://localhost:5173/`;
     const ipnUrl = "https://korey-unteeming-remi.ngrok-free.dev/payment/ipn";
     // ⚠ PHẢI MÃ HOÁ BASE64
     const rawExtra = JSON.stringify({ user: userEmail, upStore });
