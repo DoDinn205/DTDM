@@ -83,3 +83,5 @@
 2025-12-08T10:41:00.224Z - DELETE FILE id=69369fd4c1c0a03daf83cbe2 owner=admin1 - PERMANENT - size=83202
 2025-12-08T10:44:42.956Z - RESTORE FILE id=6936a07ec1c0a03daf83cc2a owner=admin1 - OK
 2025-12-08T10:59:20.908Z - INSERT FILE id=6936af88e00d39f1f5fa715d owner=admin1 - OK - name=hinh-nen-desktop-3.jpg size=155498
+2025-12-08T17:30:08.794Z - DELETE FILE id=693276e08c9bdaed8bdce0c3 owner=zzz - TRASHED - name=d
+2025-12-08T17:30:16.649Z - DELETE FILE id=693276e08c9bdaed8bdce0c3 owner=zzz - PERMANENT - size=46688
