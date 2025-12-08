@@ -63,6 +63,7 @@ router.get("/user/:username", requireAuth, async (req, res) => {
           mimetype: file.mimetype,
           size: file.size,
           folder: file.folder || null,
+          owner: file.owner,
         };
         if (file.folder && folderMap[file.folder]) {
           folderMap[file.folder].children.push(fileNode);
