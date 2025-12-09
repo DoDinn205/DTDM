@@ -36,7 +36,7 @@ export default function ShareFile() {
         {/* Preview ẢNH */}
         {file.mimetype?.startsWith("image/") && (
           <img src={file.s3Url} alt={file.filename || file.name}
-            style={{ width: "100%", marginTop: 15, borderRadius: 10 ,border: "1px solid #ddd"}} />
+            style={{ width: "100%", marginTop: 15, borderRadius: 10, border: "1px solid #ddd" }} />
         )}
 
         {/* Preview VIDEO */}
@@ -55,7 +55,20 @@ export default function ShareFile() {
         )}
 
         {/* Nút download */}
-        <a href={file.s3Url} download={file.filename || file.name}
+        <button onClick={async () => {
+          const response = await fetch(file.s3Url,{mode: 'cors'});
+          const blob = await response.blob(); 
+
+          const downloadUrl = window.URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = downloadUrl;
+          a.download = file.filename || "download"; // đặt tên file
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+
+          URL.revokeObjectURL(downloadUrl);
+        }}
           style={{
             display: "inline-block",
             marginTop: 20,
@@ -66,7 +79,7 @@ export default function ShareFile() {
             textDecoration: "none"
           }}>
           Tải xuống
-        </a>
+        </button>
       </div>
     </div>
   );
