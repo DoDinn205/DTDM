@@ -56,18 +56,23 @@ export default function ShareFile() {
 
         {/* Nút download */}
         <button onClick={async () => {
-          const response = await fetch(file.s3Url,{mode: 'cors'});
-          const blob = await response.blob(); 
+        let key = file.s3Url.split(".amazonaws.com/")[1].split("?")[0];
+        key = decodeURIComponent(key);
 
-          const downloadUrl = window.URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = downloadUrl;
-          a.download = file.filename || "download"; // đặt tên file
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
+        // POST lên BE
+        const res = await fileApi.download(key);
+        const downloadUrl = res.data.url;
 
-          URL.revokeObjectURL(downloadUrl);
+        const fileRes = await fetch(downloadUrl);
+        console.log("fileRes:", fileRes);
+        const blob = await fileRes.blob();
+
+        const href = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = href;
+        a.download = file.filename || file.name || "download";
+        a.click();
+        URL.revokeObjectURL(href);
         }}
           style={{
             display: "inline-block",

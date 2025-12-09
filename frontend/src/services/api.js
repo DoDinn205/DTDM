@@ -71,6 +71,7 @@ export const fileApi = {
 
     // API Chia sẻ (Public/Private)
     setVisibility: (id, mode) => api.post('/api/set-visibility', { id, mode }),
+    download: (key) => api.post('/api/download', { key })
 };
 
 

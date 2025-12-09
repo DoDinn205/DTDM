@@ -112,48 +112,32 @@ const Home = () => {
         try { await fileApi.delete(id); toast.success("Đã xóa"); fetchFiles(); } catch (e) { toast.error("Lỗi"); }
     };
 
-    const handleDownload = async (e, id) => {
+    const handleDownload = async (e, url, filename) => {
         e.stopPropagation();
 
         // 1. Kiểm tra ID đầu vào
-        if (!id) {
-            toast.error("Lỗi: Không tìm thấy ID file!");
+        if (!url) {
+            toast.error("Lỗi: Không tìm thấy url file!");
             return;
         }
+        let key = url.split(".amazonaws.com/")[1].split("?")[0];
+        key = decodeURIComponent(key);
 
-        const toastId = toast.loading("Đang lấy link tải...");
+        // POST lên BE
+        const res = await fileApi.download(key);
+        const downloadUrl = res.data.url;
 
-        try {
-            console.log("Đang tải ID:", id);
-            const res = await fileApi.getFileInfo(id);
+        const fileRes = await fetch(downloadUrl);
+        console.log("fileRes:", fileRes);
+        const blob = await fileRes.blob();
 
-            console.log("Backend trả về:", res.data); // Bật F12 xem dòng này
+        const href = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = href;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(href);
 
-            // 2. Tìm link tải trong mọi ngóc ngách dữ liệu
-            // Backend của bạn trả về: { filename, s3Url, mimetype, size }
-            // Hoặc có thể nằm trong res.data.data.s3Url
-            const data = res.data.data || res.data;
-            const downloadLink = data.s3Url || data.url || data.link;
-
-            if (downloadLink) {
-                toast.update(toastId, { render: "Đang mở file...", type: "success", isLoading: false, autoClose: 1000 });
-                window.open(downloadLink, '_blank');
-            } else {
-                toast.update(toastId, { render: "File này chưa có link tải (Lỗi S3)", type: "error", isLoading: false, autoClose: 3000 });
-            }
-        } catch (error) {
-            console.error("Chi tiết lỗi:", error);
-
-            // 3. Hiển thị thông báo lỗi cụ thể từ Backend
-            let msg = "Lỗi khi tải file";
-            if (error.response) {
-                if (error.response.status === 404) msg = "File không tồn tại trên hệ thống!";
-                else if (error.response.status === 403) msg = "Bạn không có quyền tải file này!";
-                else if (error.response.data && error.response.data.message) msg = error.response.data.message;
-            }
-
-            toast.update(toastId, { render: msg, type: "error", isLoading: false, autoClose: 3000 });
-        }
     };
 
     const handleLogout = () => { localStorage.removeItem('accessToken'); window.location.href = '/login'; };
@@ -189,7 +173,7 @@ const Home = () => {
 
                 <div style={{ display: 'flex', gap: '10px' }}>
 
-                  
+
 
 
 
@@ -259,9 +243,9 @@ const Home = () => {
                             {/* Action Buttons */}
 
                             <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', paddingTop: '10px', borderTop: '1px solid #f0f0f0' }}>
-                              {!isFolder && <FaShareAlt className="action-icon" color="#722ed1" title="Chia sẻ" onClick={(e) => { e.stopPropagation(); setShareFile(item); }} />}
+                                {!isFolder && <FaShareAlt className="action-icon" color="#722ed1" title="Chia sẻ" onClick={(e) => { e.stopPropagation(); setShareFile(item); }} />}
                                 <FaEdit className="action-icon" color="#1890ff" title="Đổi tên" onClick={(e) => handleRename(e, item._id || item.id, item.name || item.filename)} />
-                                {!isFolder && <FaDownload className="action-icon" color="#52c41a" title="Tải" onClick={(e) => handleDownload(e, item._id || item.id)} />}
+                                {!isFolder && <FaDownload className="action-icon" color="#52c41a" title="Tải" onClick={(e) => handleDownload(e, item.s3Url, item.filename || item.name || "download")} />}
                                 <FaTrash className="action-icon" color="#ff4d4f" title="Xóa" onClick={(e) => handleDelete(e, item._id || item.id)} />
                             </div>
 
