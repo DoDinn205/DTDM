@@ -8,7 +8,7 @@ const ShareModal = ({ file, onClose }) => {
     // 2. Nếu tên file KHÔNG có dấu chấm (.) -> Khả năng cao là Folder
     // 3. Các trường hợp còn lại (có dấu chấm .png, .jpg...) -> Là File
 
-
+    const IP ="http://localhost:5173";
     const isFolder = file.type === 'folder' || file.type === 'dir' || !file.name.includes('.');
     
     // Xác định endpoint đúng
@@ -18,7 +18,7 @@ const ShareModal = ({ file, onClose }) => {
     
     // Link mẫu
     const [link, setLink] = useState(
-        isPublic ? `http://localhost:3000/share/${shareType}/${file._id || file.id}` : ''
+        isPublic ? `${IP}/share/${shareType}/${file._id || file.id}` : ''
     );
 
     const handleToggle = async () => {
@@ -28,7 +28,7 @@ const ShareModal = ({ file, onClose }) => {
             setIsPublic(!isPublic);
             
             if (newMode === 'public') {
-                setLink(`http://localhost:3000/share/${shareType}/${file._id || file.id}`);
+                setLink(`${IP}/share/${shareType}/${file._id || file.id}`);
             } else {
                 setLink('');
             }

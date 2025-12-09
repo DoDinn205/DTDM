@@ -259,7 +259,7 @@ const Home = () => {
                             {/* Action Buttons */}
 
                             <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', paddingTop: '10px', borderTop: '1px solid #f0f0f0' }}>
-                                <FaShareAlt className="action-icon" color="#722ed1" title="Chia sẻ" onClick={(e) => { e.stopPropagation(); setShareFile(item); }} />
+                              {!isFolder && <FaShareAlt className="action-icon" color="#722ed1" title="Chia sẻ" onClick={(e) => { e.stopPropagation(); setShareFile(item); }} />}
                                 <FaEdit className="action-icon" color="#1890ff" title="Đổi tên" onClick={(e) => handleRename(e, item._id || item.id, item.name || item.filename)} />
                                 {!isFolder && <FaDownload className="action-icon" color="#52c41a" title="Tải" onClick={(e) => handleDownload(e, item._id || item.id)} />}
                                 <FaTrash className="action-icon" color="#ff4d4f" title="Xóa" onClick={(e) => handleDelete(e, item._id || item.id)} />

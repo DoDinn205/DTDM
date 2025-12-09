@@ -7,15 +7,24 @@ import Login from './pages/Auth/Login'; //Login
 import Register from './pages/Auth/Register'; //Register
 import Home from './pages/Dashboard/Home'; //Home
 import Trash from './pages/Dashboard/Trash'; //Trash 
-
+import AdminAccount from './pages/Admin/Dashboard'; //Admin Dashboard 
+import ShareFile from "./pages/ShareFile";
 // Hàm bảo vệ: Nếu chưa có token (chưa đăng nhập) thì tự đá về trang Login
+import NoPermission from './pages/NoPermission';
 const PrivateRoute = ({ children }) => {
-  // Lưu ý: Kiểm tra lại xem lúc Login bạn lưu là 'token' hay 'accessToken'
-  // Nếu chưa chắc thì cứ để code này, lát test sau.
-  const token = localStorage.getItem('accessToken');
-  return token ? children : <Navigate to="/login" />;
+  const token = localStorage.getItem("accessToken");
+  return token ? children : <Navigate to="/login" replace />;
 };
+const AdminRoute = ({ children }) => {
+  const token = localStorage.getItem("accessToken");
+  const role = localStorage.getItem("role");
 
+  if (!token) return <Navigate to="/login" replace />;
+
+  if (role !== "admin") return <Navigate to="/no-permission" replace />;
+
+  return children;
+};
 function App() {
   return (
     <BrowserRouter>
@@ -26,11 +35,16 @@ function App() {
         {/* Đường dẫn trang Login */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-
+        <Route path="/no-permission" element={<NoPermission />} />
         {/* Đường dẫn trang chủ (được bảo vệ) */}
         <Route path="/" element={
           <PrivateRoute>
             <Home />
+          </PrivateRoute>
+        } />
+         <Route path="/share/file/:fileId" element={
+          <PrivateRoute>
+            <ShareFile />
           </PrivateRoute>
         } />
         <Route path="/trash" element={
@@ -38,6 +52,13 @@ function App() {
             <Trash />
           </PrivateRoute>
         } />
+
+        <Route path="/admin/dashboard" element={
+          <AdminRoute>
+            <AdminAccount />
+          </AdminRoute>
+        } />
+
       </Routes>
     </BrowserRouter>
   );

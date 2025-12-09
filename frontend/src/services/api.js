@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const BASE_URL = 'http://52.76.57.239'; 
-
+//const BASE_URL = 'http://localhost:3000'; // Dùng cho phát triển cục bộ
 const api = axios.create({
     baseURL: BASE_URL,
     headers: { 'Content-Type': 'application/json' }
@@ -16,9 +16,13 @@ api.interceptors.request.use((config) => {
 // 1. AUTH & USER
 export const authApi = {
     login: (email, password) => api.post('/auth/login', { email, password }),
-    register: (name, email, password) => api.post('/auth/register', { name, email, password }),
+    register: (name, email, password,role,plan) => api.post('/auth/register', { name, email, password, role, plan }),
     // Hàm này để lấy thông tin Profile
     getProfile: () => api.get('/api/user'), 
+    getAllUsers: () => api.get('/auth/all'),
+    delete: (id) => api.post(`/auth/delete`,{userId:id}),
+    update: (id, name, email, password, role, storageLimit, plan) => 
+        api.post('/auth/update', { id, name, email, password, role, plan }),
 };
 
 // 2. FILE & FOLDER
@@ -63,7 +67,7 @@ export const fileApi = {
     deletePermanent: (id) => api.post('/api/trash/empty', { id }),
     
     // API lấy link file (cho chức năng Download/View)
-    getFileInfo: (fileId) => api.get(`/share/file/${fileId}`),
+    getFileInfo: (fileId) => api.post(`/share/file/${fileId}`),
 
     // API Chia sẻ (Public/Private)
     setVisibility: (id, mode) => api.post('/api/set-visibility', { id, mode }),

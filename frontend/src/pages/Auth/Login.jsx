@@ -16,11 +16,12 @@ const Login = () => {
 
             // Kiểm tra xem backend trả về accessToken hay token
             const token = res.data.accessToken || res.data.token;
-
+            const role = res.data.role;
             if (res.data && res.data.accessToken) {
     localStorage.setItem('accessToken', res.data.accessToken); 
+    localStorage.setItem('role', res.data.role);
     // Dùng dòng này để ép trình duyệt load lại trang, đảm bảo vào được Home
-    window.location.href = '/'; 
+    window.location.href = role == 'admin' ? '/admin/dashboard' : '/'; 
 
                 
             } else {
