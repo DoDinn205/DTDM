@@ -1,13 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { fileApi } from '../../services/api';
 import { toast } from 'react-toastify';
 import { FaGlobe, FaLock, FaCopy, FaTimes, FaFolder, FaFileAlt } from 'react-icons/fa';
-
 const ShareModal = ({ file, onClose }) => {
     // --- SỬA LẠI LOGIC NHẬN DIỆN (Giống hệt Home.jsx) ---
     // 1. Nếu type là 'folder' hoặc 'dir' -> Là Folder
     // 2. Nếu tên file KHÔNG có dấu chấm (.) -> Khả năng cao là Folder
     // 3. Các trường hợp còn lại (có dấu chấm .png, .jpg...) -> Là File
+
+
     const isFolder = file.type === 'folder' || file.type === 'dir' || !file.name.includes('.');
     
     // Xác định endpoint đúng

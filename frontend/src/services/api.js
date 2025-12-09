@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://localhost:3000'; 
+const BASE_URL = 'http://52.76.57.239'; 
 
 const api = axios.create({
     baseURL: BASE_URL,
@@ -28,7 +28,7 @@ export const fileApi = {
     
     // API tìm kiếm
     search: (keyword) => api.get('/search', { params: { kw: keyword } }),
-    
+    searchUserItems: (username) => api.get(`/search/user/${username}`),
     createFolder: (name, parentId) => {
         const data = { name };
         // Chỉ gửi parentId nếu nó có giá trị thực
@@ -69,7 +69,7 @@ export const fileApi = {
     setVisibility: (id, mode) => api.post('/api/set-visibility', { id, mode }),
 };
 
-// 3. THANH TOÁN (Đây là cái bạn đang thiếu!)
+
 export const paymentApi = {
     purchase: (amount, upStore) => api.post('/payment/purchase', { amount, upStore })
 };

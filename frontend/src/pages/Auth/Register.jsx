@@ -68,7 +68,7 @@ const Register = () => {
                 <div style={{ marginBottom: '15px' }}>
                     <label style={{fontWeight: 'bold'}}>Email</label>
                     <input 
-                        name="email" type="email" placeholder="example@gmail.com"
+                        name="email" type="text" placeholder="example@gmail.com"
                         onChange={handleChange} required 
                         style={{ width: '100%', padding: '10px', marginTop: '5px', border: '1px solid #ddd', borderRadius: '5px' }} 
                     />

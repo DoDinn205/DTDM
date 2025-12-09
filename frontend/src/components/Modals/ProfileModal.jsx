@@ -3,10 +3,15 @@ import { FaUserCircle, FaHdd, FaTimes } from 'react-icons/fa';
 
 const ProfileModal = ({ user, onClose }) => {
     if (!user) return null;
-    const limitGB = (user.storageLimit / (1024 * 1024 * 1024)).toFixed(2);
-    const usedGB = (user.storageUsed / (1024 * 1024 * 1024)).toFixed(2);
+   // const limitGB = (user.storageLimit / (1024 * 1024 * 1024)).toFixed(2);
+   // const usedGB = (user.storageUsed / (1024 * 1024 * 1024)).toFixed(2);
     const percent = Math.min((user.storageUsed / user.storageLimit) * 100, 100) || 0;
-
+     const format = (bytes = 0) => {
+    const sizes = ["B", "KB", "MB", "GB", "TB"];
+    if (bytes === 0) return "0";
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
+     }
     return (
         <div style={overlayStyle}>
             <div style={modalStyle}>
@@ -25,8 +30,8 @@ const ProfileModal = ({ user, onClose }) => {
                         <div style={{width: `${percent}%`, height: '100%', background: percent > 90 ? 'red' : '#1890ff'}}></div>
                     </div>
                     <div style={{display: 'flex', justifyContent: 'space-between', marginTop: '5px', fontSize: '12px'}}>
-                        <span>Dùng: {usedGB} GB</span>
-                        <span>Tổng: {limitGB} GB</span>
+                        <span>Dùng: {format(user.storageUsed)}</span>
+                        <span>Tổng: {format(user.storageLimit)}</span>
                     </div>
                 </div>
             </div>

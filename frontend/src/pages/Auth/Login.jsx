@@ -40,7 +40,7 @@ const Login = () => {
                 <div style={{ marginBottom: '15px' }}>
                     <label>Email:</label>
                     <input 
-                        type="email" 
+                        type="text" 
                         value={email} 
                         onChange={(e) => setEmail(e.target.value)} 
                         required 
