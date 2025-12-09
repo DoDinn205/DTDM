@@ -8,4 +8,6 @@ router.use("/", require("./refresh"));
 router.use("/", require("./delete"));
 router.use("/",require("./changepass"))
 router.use("/",require("./rename"))
+router.use("/", require("./alluser"));
+router.use("/", require("./update"));
 module.exports = router;
