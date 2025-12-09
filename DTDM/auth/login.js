@@ -34,7 +34,7 @@ router.post("/login", async (req, res) => {
     user.refreshToken = refreshToken;
     await user.save();
 
-    res.json({ message: "Logged in", accessToken, refreshToken });
+    res.json({ message: "Logged in", accessToken, refreshToken, role: user.role });
   } catch (err) {
     res.status(500).json({ message: "Login failed", error: err.message });
   }
