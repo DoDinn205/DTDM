@@ -9,4 +9,6 @@ router.use("/", require("./trash"));
 router.use("/", require("./rename"));
 router.use("/",require("./user"))
 router.use("/",require("./setvisibility"))
+router.use("/",require("./download"))
+
 module.exports = router;

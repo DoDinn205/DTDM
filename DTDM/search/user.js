@@ -40,6 +40,7 @@ router.get("/user/:username", requireAuth, async (req, res) => {
           parent: f.parent || null,
           sharedWith: f.sharedWith || [],
           children: [],
+          trashed: f.trashed || false,
         };
       }
     });
@@ -64,6 +65,7 @@ router.get("/user/:username", requireAuth, async (req, res) => {
           size: file.size,
           folder: file.folder || null,
           owner: file.owner,
+          trashed: file.trashed || false,
         };
         if (file.folder && folderMap[file.folder]) {
           folderMap[file.folder].children.push(fileNode);

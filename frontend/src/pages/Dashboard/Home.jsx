@@ -46,6 +46,12 @@ const Home = () => {
                 if (searchTerm.trim().startsWith('@')) {
                     const username = searchTerm.trim().substring(1);
                     res = await fileApi.searchUserItems(username);
+                    res = res.data.structure;
+                    console.log("res from user search:", res);
+
+                    res = res.filter(item => item.trashed !== true);
+                    console.log("res from user search:", res);
+
                 } else {
                     res = await fileApi.search(searchTerm);
                 }
@@ -60,6 +66,7 @@ const Home = () => {
             else if (res.data?.structure) safeData = res.data.structure;
             else if (res.data?.files) safeData = res.data.files;
             else if (res.data?.data) safeData = res.data.data;
+            else safeData = res;
 
             setFiles(safeData);
         } catch (error) {
