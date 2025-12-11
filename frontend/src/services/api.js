@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://52.76.57.239'; 
+const BASE_URL = 'http://LB-248702514.ap-southeast-1.elb.amazonaws.com'; 
 //const BASE_URL = 'http://localhost:3000'; // Dùng cho phát triển cục bộ
 const api = axios.create({
     baseURL: BASE_URL,

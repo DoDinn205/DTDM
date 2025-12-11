@@ -26,7 +26,7 @@ app.use("/auth", require("./auth"));
 app.use("/share", require("./share"));
 app.use("/payment", require("./payment"));
 app.use("/search", require("./search"));
-
+app.use("/health", (req, res) => res.send("OK"));
 const PORT = process.env.PORT || 3000;
 
 
