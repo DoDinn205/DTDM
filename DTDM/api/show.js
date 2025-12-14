@@ -29,7 +29,7 @@ router.get("/tree", requireAuth, async (req, res) => {
         parent: f.parent,
         visibility:f.visibility,
         children: [],
-        shareWith:f.sharedWith
+        sharedWith:f.sharedWith
       };
     });
 
@@ -50,7 +50,7 @@ router.get("/tree", requireAuth, async (req, res) => {
           s3Url: file.s3Url,
           size: file.size,
           visibility: file.visibility,
-          shareWith: file.sharedWith
+          sharedWith: file.sharedWith
         });
       }
     });
@@ -68,7 +68,7 @@ router.get("/tree", requireAuth, async (req, res) => {
         s3Url: f.s3Url,
         size: f.size,
         visibility: f.visibility,
-        shareWith: f.sharedWith
+        sharedWith: f.sharedWith
 
       }));
 
@@ -105,7 +105,7 @@ router.get("/tree/:folderId", requireAuth, async (req, res) => {
         name: f.name,
         s3Url: f.s3Url,
         visibility: f.visibility,
-        shareWith: f.sharedWith
+        sharedWith: f.sharedWith
       })),
       ...subFiles.map((f) => ({
         id: f._id.toString(),
@@ -114,7 +114,7 @@ router.get("/tree/:folderId", requireAuth, async (req, res) => {
         size: f.size,
         s3Url: f.s3Url,
         visibility: f.visibility,
-        shareWith: f.sharedWith
+        sharedWith: f.sharedWith
 
       })),
     ];

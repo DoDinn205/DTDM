@@ -53,51 +53,54 @@ router.post('/file/:id', async (req, res) => {
   }
 });
 
-// GET /share/folder/:folderId - recursive children if folder accessible
-router.post('/folder/:id', async (req, res) => {
+router.get("/folder/:id", async (req, res) => {
   try {
     const { id } = req.params;
+
     const folder = await Folder.findById(id);
-    if (!folder) return res.status(404).json({ message: 'Folder not found' });
-    if (folder.trashed) return res.status(404).json({ message: 'Folder not found' });
+    if (!folder || folder.trashed)
+      return res.status(404).json({ message: "Folder not found" });
 
-    const requester = tryDecodeToken(req);
-    const isOwner = requester && requester.email === folder.owner;
-    const isAdmin = requester && requester.role === 'admin';
+    const user = tryDecode(req);
+    const isOwner = user && user.email === folder.owner;
 
-    if (folder.visibility === 'private') return res.status(403).json({ message: 'Folder is private' });
-    if (folder.visibility === 'shared' && !isOwner && !isAdmin) {
-      if (!requester) return res.status(401).json({ message: 'Authentication required for shared folder' });
-      const allowed = Array.isArray(folder.sharedWith) && folder.sharedWith.some(s => s.userId === requester.email);
-      if (!allowed) return res.status(403).json({ message: 'Forbidden' });
+    // Quyền xem
+    if (folder.visibility === "private")
+      return res.status(403).json({ message: "Folder is private" });
+
+    if (folder.visibility === "shared" && !isOwner) {
+      if (!user) return res.status(401).json({ message: "Login required" });
+
+      const allowed = folder.sharedWith?.some(s => s.email === user.email);
+      if (!allowed) return res.status(403).json({ message: "Forbidden" });
     }
 
-    // BFS traversal, only non-trashed
-    const queue = [id];
-    const folders = [];
-    const files = [];
+    // Lấy subfolder và file CHỈ 1 CẤP
+    const subFolders = await Folder.find({
+      parent: id,
+      trashed: { $ne: true }
+    }).select("_id name visibility");
 
-    while (queue.length) {
-      const cur = queue.shift();
-      const subFolders = await Folder.find({ parent: cur, trashed: { $ne: true } });
-      const subFiles = await File.find({ folder: cur, trashed: { $ne: true } });
+    const files = await File.find({
+      folder: id,
+      trashed: { $ne: true }
+    }).select("_id filename mimetype size s3Url visibility");
 
-      for (const f of subFolders) {
-        folders.push({ id: f._id.toString(), name: f.name, visibility: f.visibility, owner: f.owner });
-        queue.push(f._id.toString());
-      }
-
-      for (const fi of subFiles) {
-        files.push({ id: fi._id.toString(), filename: fi.filename, s3Url: fi.s3Url, mimetype: fi.mimetype, size: fi.size, visibility: fi.visibility });
-      }
-    }
-
-    try { writeActivity(`ACCESS FOLDER id=${id}`, 'OK', `items=${folders.length + files.length}`); } catch(_){}
-    return res.json({ folder: { id: folder._id.toString(), name: folder.name, owner: folder.owner }, folders, files });
+    return res.json({
+      folder: {
+        id: folder._id,
+        name: folder.name,
+        parent: folder.parent,
+        visibility: folder.visibility
+      },
+      subFolders,
+      files
+    });
   } catch (err) {
-    console.error('Public folder view error:', err);
-    return res.status(500).json({ message: 'Failed to fetch folder', error: err.message });
+    console.error(err);
+    res.status(500).json({ message: "Failed to load folder" });
   }
 });
+
 
 module.exports = router;

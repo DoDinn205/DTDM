@@ -53,9 +53,88 @@ async function getAllChildren(folderId) {
   return { resultFolders, resultFiles };
 }
 
+// router.post("/set-visibility", requireAuth, async (req, res) => {
+//   try {
+//     const { id, mode, emails, access } = req.body;
+//     const userEmail = req.user.email;
+
+//     let item = await File.findOne({ _id: id, owner: userEmail });
+//     let type = "file";
+
+//     if (!item) {
+//       item = await Folder.findOne({ _id: id, owner: userEmail });
+//       type = "folder";
+//     }
+
+//     if (!item) return res.status(404).json({ message: "Item not found" });
+
+//     // NGĂN con có quyền cao hơn cha
+//     if (type === "file" && item.folder) {
+//       const parent = await Folder.findById(item.folder);
+//       if (parent && rank[mode] > rank[parent.visibility]) {
+//         return res.status(400).json({
+//           message: "Child cannot have higher visibility than parent",
+//         });
+//       }
+//     }
+
+//     // set visibility chính cho item
+//     item.visibility = mode;
+
+//     // SET SHARE LIST
+//     if (mode === "shared" && Array.isArray(emails)) {
+//       emails.forEach((email) => {
+//         const exist = item.sharedWith.find((s) => s.userId === email);
+//         if (exist) exist.access = [access || "view"];
+//         else item.sharedWith.push({ userId: email, access: [access || "view"] });
+//       });
+//     }
+
+//     if (mode !== "shared") item.sharedWith = [];
+
+//     await item.save();
+//     try { writeActivity(`UPDATE ${type.toUpperCase()} id=${item._id} owner=${userEmail}`, 'OK', `visibility=${mode}`); } catch(_){}
+
+//     // ========= APPLY TO CHILDREN =========
+//     if (type === "folder") {
+
+//       const { resultFolders, resultFiles } = await getAllChildren(item._id);
+
+//       const parentShare = item.sharedWith;
+
+//       for (const f of [...resultFolders, ...resultFiles]) {
+
+//         // 1) visibility con không được vượt cha
+//         if (rank[f.visibility] > rank[mode]) {
+//           f.visibility = mode;
+//         }
+
+//         // 2) merge quyền share
+//         if (mode === "shared") {
+//           f.sharedWith = mergePermissions(parentShare, f.sharedWith);
+//         } else {
+//           f.sharedWith = [];
+//         }
+
+//         await f.save();
+//         // log child update
+//         try {
+//           const kind = f.constructor && f.constructor.modelName ? f.constructor.modelName.toUpperCase() : 'ITEM';
+//           writeActivity(`UPDATE ${kind} id=${f._id} owner=${f.owner}`, 'OK', `propagated visibility=${f.visibility}`);
+//         } catch(_){}
+//       }
+//     }
+
+//     res.json({ message: "Visibility updated", item, type });
+
+//   } catch (err) {
+//     try { writeActivity(`UPDATE ${req.body?.id || 'UNKNOWN'}`, 'FAILED', err.message); } catch(_){}
+//     res.status(500).json({ message: "Error", error: err.message });
+//   }
+// });
 router.post("/set-visibility", requireAuth, async (req, res) => {
   try {
-    const { id, mode, emails, access } = req.body;
+    const { id, mode, emails = [], removeEmails = [], access } = req.body;
     const userEmail = req.user.email;
 
     let item = await File.findOne({ _id: id, owner: userEmail });
@@ -68,7 +147,7 @@ router.post("/set-visibility", requireAuth, async (req, res) => {
 
     if (!item) return res.status(404).json({ message: "Item not found" });
 
-    // NGĂN con có quyền cao hơn cha
+    // ===== CHẶN CON > CHA =====
     if (type === "file" && item.folder) {
       const parent = await Folder.findById(item.folder);
       if (parent && rank[mode] > rank[parent.visibility]) {
@@ -78,60 +157,95 @@ router.post("/set-visibility", requireAuth, async (req, res) => {
       }
     }
 
-    // set visibility chính cho item
+    // ===== SET VISIBILITY =====
     item.visibility = mode;
 
-    // SET SHARE LIST
-    if (mode === "shared" && Array.isArray(emails)) {
+    // ===== ADD EMAILS =====
+    if (mode === "shared" && emails.length > 0) {
       emails.forEach((email) => {
         const exist = item.sharedWith.find((s) => s.userId === email);
-        if (exist) exist.access = [access || "view"];
-        else item.sharedWith.push({ userId: email, access: [access || "view"] });
+        if (exist) {
+          exist.access = [access || "view"];
+        } else {
+          item.sharedWith.push({
+            userId: email,
+            access: [access || "view"],
+          });
+        }
       });
     }
 
-    if (mode !== "shared") item.sharedWith = [];
+    // ===== REMOVE EMAILS =====
+    if (removeEmails.length > 0) {
+      item.sharedWith = item.sharedWith.filter(
+        (s) => !removeEmails.includes(s.userId)
+      );
+    }
+
+    // ===== CLEAR SHARE IF NOT SHARED =====
+    if (mode !== "shared") {
+      item.sharedWith = [];
+    }
 
     await item.save();
-    try { writeActivity(`UPDATE ${type.toUpperCase()} id=${item._id} owner=${userEmail}`, 'OK', `visibility=${mode}`); } catch(_){}
 
-    // ========= APPLY TO CHILDREN =========
+    try {
+      writeActivity(
+        `UPDATE ${type.toUpperCase()} id=${item._id}`,
+        "OK",
+        `visibility=${mode}`
+      );
+    } catch (_) {}
+
+    // ===== APPLY TO CHILDREN =====
     if (type === "folder") {
-
       const { resultFolders, resultFiles } = await getAllChildren(item._id);
-
       const parentShare = item.sharedWith;
 
       for (const f of [...resultFolders, ...resultFiles]) {
-
-        // 1) visibility con không được vượt cha
+        // 1️⃣ visibility con ≤ cha
         if (rank[f.visibility] > rank[mode]) {
           f.visibility = mode;
         }
 
-        // 2) merge quyền share
+        // 2️⃣ xử lý shared
         if (mode === "shared") {
+          // merge quyền
           f.sharedWith = mergePermissions(parentShare, f.sharedWith);
+
+          // remove email nếu có
+          if (removeEmails.length > 0) {
+            f.sharedWith = f.sharedWith.filter(
+              (s) => !removeEmails.includes(s.userId)
+            );
+          }
         } else {
           f.sharedWith = [];
         }
 
         await f.save();
-        // log child update
+
         try {
-          const kind = f.constructor && f.constructor.modelName ? f.constructor.modelName.toUpperCase() : 'ITEM';
-          writeActivity(`UPDATE ${kind} id=${f._id} owner=${f.owner}`, 'OK', `propagated visibility=${f.visibility}`);
-        } catch(_){}
+          writeActivity(
+            `UPDATE CHILD ${f._id}`,
+            "OK",
+            `propagated visibility`
+          );
+        } catch (_) {}
       }
     }
 
-    res.json({ message: "Visibility updated", item, type });
+    return res.json({ message: "Visibility updated", type, item });
 
   } catch (err) {
-    try { writeActivity(`UPDATE ${req.body?.id || 'UNKNOWN'}`, 'FAILED', err.message); } catch(_){}
-    res.status(500).json({ message: "Error", error: err.message });
+    try {
+      writeActivity(`UPDATE VISIBILITY`, "FAILED", err.message);
+    } catch (_) {}
+
+    return res.status(500).json({ message: "Error", error: err.message });
   }
 });
+
 // xoa quyen
 //chinh
 module.exports = router;
