@@ -70,7 +70,7 @@ export const fileApi = {
     getFileInfo: (fileId) => api.post(`/share/file/${fileId}`),
 
     // API Chia sẻ (Public/Private)
-    setVisibility: (id, mode) => api.post('/api/set-visibility', { id, mode }),
+    setVisibility: (id, mode,emails,removeEmails) => api.post('/api/set-visibility', { id, mode,emails,removeEmails }),
     download: (key) => api.post('/api/download', { key })
 };
 

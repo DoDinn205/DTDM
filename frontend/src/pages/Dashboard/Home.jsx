@@ -7,7 +7,7 @@ import { toast } from 'react-toastify';
 import ProfileModal from '../../components/Modals/ProfileModal';
 import PaymentModal from '../../components/Modals/PaymentModal';
 import ShareModal from '../../components/Modals/ShareModal';
-
+import PreviewModal from '../../components/Modals/PreviewModal';
 import {
     FaFolder, FaFileAlt, FaSignOutAlt, FaPlus, FaCloudUploadAlt,
     FaArrowLeft, FaTrash, FaDownload, FaEdit, FaSearch, FaTrashAlt,
@@ -24,7 +24,10 @@ const Home = () => {
     const [user, setUser] = useState(null);
     const [showProfile, setShowProfile] = useState(false);
     const [showPayment, setShowPayment] = useState(false);
+    const [showPreview, setShowPreview] = useState(false);
+
     const [shareFile, setShareFile] = useState(null);
+    const [preview, setPreview] = useState(null);
     const navigate = useNavigate();
 
     // 1. Lấy thông tin ban đầu
@@ -43,7 +46,7 @@ const Home = () => {
         try {
             let res;
             if (searchTerm.trim()) {
-                if (searchTerm.trim().startsWith('@')) {
+                if (searchTerm.trim().startsWith('#')) {
                     const username = searchTerm.trim().substring(1);
                     res = await fileApi.searchUserItems(username);
                     res = res.data.structure;
@@ -233,6 +236,25 @@ const Home = () => {
                         <div
                             key={item._id || item.id}
                             onClick={() => isFolder ? handleOpenFolder(item._id || item.id) : null}
+
+                            onMouseEnter={() => {
+                                if (showPreview !== item._id && item.type !== 'folder') {
+                                    setShowPreview(true);
+                                    setPreview()
+                                }
+                            }}
+
+                            onMouseLeave={() => {
+                                if (showPreview === item._id) {
+                                    setShowPreview(false);
+                                }
+                            }}
+
+
+                            
+
+
+
                             style={{
                                 border: '1px solid #eee', borderRadius: '12px', padding: '20px',
                                 textAlign: 'center', cursor: 'pointer', backgroundColor: isFolder ? '#fffbe6' : 'white',
@@ -273,7 +295,33 @@ const Home = () => {
             {showProfile && user && <ProfileModal user={user} onClose={() => setShowProfile(false)} />}
             {showPayment && <PaymentModal onClose={() => setShowPayment(false)} />}
             {shareFile && <ShareModal file={shareFile} onClose={() => setShareFile(null)} />}
-
+            {showPreview && <PreviewModal file={preview} onClose={() => setShowPreview(false)} />}
+            {preview && (
+                <div
+                    style={{
+                        position: 'fixed',
+                        top: preview.y,
+                        left: preview.x,
+                        zIndex: 9999,
+                        background: '#fff',
+                        padding: '6px',
+                        borderRadius: '8px',
+                        boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
+                        pointerEvents: 'none'
+                    }}
+                >
+                    <img
+                        src={preview.url}
+                        alt="preview"
+                        style={{
+                            maxWidth: '220px',
+                            maxHeight: '220px',
+                            objectFit: 'contain',
+                            borderRadius: '6px'
+                        }}
+                    />
+                </div>
+            )}
             {/* CSS nhanh cho icon hover */}
             <style>{`
                 .action-icon { cursor: pointer; transition: 0.2s; font-size: 16px; }

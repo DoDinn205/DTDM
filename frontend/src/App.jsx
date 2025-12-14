@@ -11,6 +11,7 @@ import AdminAccount from './pages/Admin/Dashboard'; //Admin Dashboard
 import ShareFile from "./pages/ShareFile";
 // Hàm bảo vệ: Nếu chưa có token (chưa đăng nhập) thì tự đá về trang Login
 import NoPermission from './pages/NoPermission';
+ 
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem("accessToken");
   return token ? children : <Navigate to="/login" replace />;
@@ -47,6 +48,7 @@ function App() {
             <ShareFile />
           </PrivateRoute>
         } />
+      
         <Route path="/trash" element={
           <PrivateRoute>
             <Trash />

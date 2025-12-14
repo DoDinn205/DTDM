@@ -1,40 +1,73 @@
 import { useState, useEffect } from 'react';
 import { fileApi } from '../../services/api';
 import { toast } from 'react-toastify';
-import { FaGlobe, FaLock, FaCopy, FaTimes, FaFolder, FaFileAlt } from 'react-icons/fa';
-const ShareModal = ({ file, onClose }) => {
-    // --- SỬA LẠI LOGIC NHẬN DIỆN (Giống hệt Home.jsx) ---
-    // 1. Nếu type là 'folder' hoặc 'dir' -> Là Folder
-    // 2. Nếu tên file KHÔNG có dấu chấm (.) -> Khả năng cao là Folder
-    // 3. Các trường hợp còn lại (có dấu chấm .png, .jpg...) -> Là File
+import {
+    FaGlobe, FaLock, FaCopy, FaTimes,
+    FaUserPlus, FaTrash
+} from 'react-icons/fa';
 
-    const IP ="http://localhost:5173";
+const ShareModal = ({ file, onClose }) => {
+    const IP = "http://13.250.225.126";
     const isFolder = file.type === 'folder' || file.type === 'dir' || !file.name.includes('.');
-    
-    // Xác định endpoint đúng
-    const shareType = isFolder ? 'folder' : 'file'; 
+    const shareType = isFolder ? 'folder' : 'file';
 
     const [isPublic, setIsPublic] = useState(file.visibility === 'public');
-    
-    // Link mẫu
+    const [email, setEmail] = useState('');
+    const [sharedWith, setSharedWith] = useState(file.sharedWith || []);
+
     const [link, setLink] = useState(
         isPublic ? `${IP}/share/${shareType}/${file._id || file.id}` : ''
     );
-
+    useEffect(() => {
+       const initData = async () => {
+                   try {
+                      setSharedWith(file.shareWith)
+                   } catch (e) { console.error(e); }
+               };
+               initData();
+    }, []);
+    /* ===== TOGGLE PUBLIC / PRIVATE ===== */
     const handleToggle = async () => {
         const newMode = isPublic ? 'private' : 'public';
         try {
             await fileApi.setVisibility(file._id || file.id, newMode);
             setIsPublic(!isPublic);
-            
-            if (newMode === 'public') {
-                setLink(`${IP}/share/${shareType}/${file._id || file.id}`);
-            } else {
-                setLink('');
-            }
+            setLink(newMode === 'public'
+                ? `${IP}/share/${shareType}/${file._id || file.id}`
+                : ''
+            );
             toast.success(`Đã chuyển sang ${newMode}`);
-        } catch (error) { 
-            toast.error("Lỗi cập nhật trạng thái"); 
+        } catch {
+            toast.error("Lỗi cập nhật trạng thái");
+        }
+    };
+
+    /* ===== ADD EMAIL ===== */
+    const handleAddEmail = async () => {
+        if (!email) {
+            toast.error("Email không hợp lệ");
+            return;
+        }
+
+        try {
+            await fileApi.setVisibility(file._id || file.id, "shared", [email], []);
+            setSharedWith([...sharedWith, { userId: email, access: ["view"] }]);
+            setEmail('');
+            toast.success("Đã chia sẻ");
+        } catch {
+            toast.error("Không thể chia sẻ");
+        }
+    };
+
+    /* ===== REMOVE EMAIL ===== */
+    const handleRemoveEmail = async (emailToRemove) => {
+        try {
+            await fileApi.setVisibility(file._id || file.id, "shared", [], [emailToRemove]);
+
+            setSharedWith(sharedWith.filter(s => s.userId !== emailToRemove));
+            toast.success("Đã xoá quyền");
+        } catch {
+            toast.error("Không thể xoá");
         }
     };
 
@@ -47,55 +80,82 @@ const ShareModal = ({ file, onClose }) => {
         <div style={overlayStyle}>
             <div style={modalStyle}>
                 <button onClick={onClose} style={closeBtnStyle}><FaTimes /></button>
-                
-                {/* TIÊU ĐỀ + ICON */}
-                <h3 style={{display: 'flex', alignItems: 'center', gap: '10px', color: '#333'}}>
-                    {isFolder ? <FaFolder color="#faad14" size={28}/> : <FaFileAlt color="#1890ff" size={28}/>}
-                    {isFolder ? 'Chia sẻ Thư mục' : 'Chia sẻ File'}
-                </h3>
-                
-                <p style={{marginBottom:'20px', color: '#666', fontWeight: '500', wordBreak: 'break-word'}}>
-                    {file.name || file.filename}
-                </p>
-                
-                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', background: '#f9f9f9', padding: '15px', borderRadius: '8px'}}>
-                    <div style={{display: 'flex', gap: '10px', alignItems: 'center'}}>
-                        {isPublic ? <FaGlobe color="#52c41a" size={24}/> : <FaLock color="#f5222d" size={24}/>}
+
+                <h3>Chia sẻ</h3>
+                <p style={{ color: '#666' }}>{file.name || file.filename}</p>
+
+                {/* ===== PUBLIC / PRIVATE ===== */}
+                <div style={box}>
+                    <div style={{ display: 'flex', gap: 10 }}>
+                        {isPublic ? <FaGlobe color="#52c41a" /> : <FaLock color="#f5222d" />}
                         <div>
-                            <strong style={{display: 'block', marginBottom: '3px'}}>
-                                {isPublic ? 'Đang Công khai (Public)' : 'Đang Riêng tư (Private)'}
-                            </strong>
-                            <span style={{fontSize: '12px', color: '#888'}}>
-                                {isPublic ? 'Bất kỳ ai có link đều xem được' : 'Chỉ mình bạn xem được'}
-                            </span>
+                            <strong>{isPublic ? 'Công khai' : 'Riêng tư'}</strong>
+                            <div style={{ fontSize: 12, color: '#888' }}>
+                                {isPublic ? 'Ai có link đều xem được' : 'Chỉ mình bạn'}
+                            </div>
                         </div>
                     </div>
-                    <button onClick={handleToggle} style={{
-                        padding: '8px 16px', 
-                        background: isPublic ? '#fff1f0' : '#e6f7ff', 
-                        color: isPublic ? '#ff4d4f' : '#1890ff', 
-                        border: `1px solid ${isPublic ? '#ffccc7' : '#91d5ff'}`, 
-                        borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold'
-                    }}>
+                    <button onClick={handleToggle} style={toggleBtn(isPublic)}>
                         {isPublic ? 'Tắt' : 'Bật'}
                     </button>
                 </div>
 
+                {/* ===== LINK ===== */}
                 {isPublic && (
-                    <div style={{background: '#fff', padding: '5px', borderRadius: '6px', display: 'flex', gap: '10px', alignItems: 'center', border: '1px solid #d9d9d9'}}>
-                        <input type="text" value={link} readOnly style={{flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: '13px', color: '#333', padding: '8px'}} />
-                        <button onClick={copyToClipboard} title="Copy Link" style={{cursor: 'pointer', border: 'none', background: '#f0f0f0', padding: '8px 12px', borderRadius: '4px', transition: '0.2s'}}>
-                            <FaCopy color="#555"/>
-                        </button>
+                    <div style={linkBox}>
+                        <input value={link} readOnly style={inputStyle} />
+                        <button onClick={copyToClipboard}><FaCopy /></button>
                     </div>
                 )}
+
+                {/* ===== SHARED WITH ===== */}
+                {!isPublic &&
+                <>
+                <h4 style={{ marginTop: 20 }}>Chia sẻ với người khác</h4>
+
+                <div style={{ display: 'flex', gap: 10 }}>
+                    <input
+                        placeholder="Nhập email..."
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}
+                        style={inputStyle}
+                        type='text'
+                    />
+                    <button onClick={handleAddEmail} style={addBtn}>
+                        <FaUserPlus />
+                    </button>
+                </div>
+
+                {/* ===== LIST EMAILS ===== */}
+                {sharedWith.length > 0 && (
+                    <div style={listBox}>
+                        {sharedWith.map((s, i) => (
+                            <div key={i} style={row}>
+                                <span>{s.userId}</span>
+                                <button onClick={() => handleRemoveEmail(s.userId)}>
+                                    <FaTrash />
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                )}
+                </>
+                }
             </div>
         </div>
     );
 };
 
-const overlayStyle = { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 };
-const modalStyle = { background: 'white', padding: '30px', borderRadius: '12px', width: '500px', position: 'relative', boxShadow: '0 10px 30px rgba(0,0,0,0.15)' };
-const closeBtnStyle = { position: 'absolute', top: '15px', right: '15px', background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#999' };
+/* ===== STYLES ===== */
+const overlayStyle = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' };
+const modalStyle = { background: '#fff', padding: 30, borderRadius: 12, width: 500, position: 'relative' };
+const closeBtnStyle = { position: 'absolute', top: 15, right: 15, border: 'none', background: 'none', cursor: 'pointer' };
+const box = { display: 'flex', justifyContent: 'space-between', padding: 15, background: '#f9f9f9', borderRadius: 8 };
+const toggleBtn = (on) => ({ padding: '6px 14px', borderRadius: 6, cursor: 'pointer', border: '1px solid #ddd', background: on ? '#fff1f0' : '#e6f7ff' });
+const linkBox = { display: 'flex', marginTop: 10, gap: 10 };
+const inputStyle = { flex: 1, padding: 8, border: '1px solid #ddd', borderRadius: 6 };
+const addBtn = { background: '#1890ff', color: '#fff', border: 'none', borderRadius: 6, padding: '0 12px', cursor: 'pointer' };
+const listBox = { marginTop: 10, border: '1px solid #eee', borderRadius: 6 };
+const row = { display: 'flex', justifyContent: 'space-between', padding: 8, borderBottom: '1px solid #eee' };
 
 export default ShareModal;
