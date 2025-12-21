@@ -7,13 +7,6 @@ const { writeActivity } = require("../log");
 
 const router = express.Router();
 
-/**
- * DELETE API — ONLY SOFT DELETE
- * Không xóa vĩnh viễn
- * Không đụng S3
- * Không update quota
- * Chỉ chuyển file/folder sang trạng thái trash
- */
 
 router.post("/delete", requireAuth, async (req, res) => {
   try {

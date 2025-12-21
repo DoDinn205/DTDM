@@ -237,24 +237,6 @@ const Home = () => {
                             key={item._id || item.id}
                             onClick={() => isFolder ? handleOpenFolder(item._id || item.id) : null}
 
-                            onMouseEnter={() => {
-                                if (showPreview !== item._id && item.type !== 'folder') {
-                                    setShowPreview(true);
-                                    setPreview()
-                                }
-                            }}
-
-                            onMouseLeave={() => {
-                                if (showPreview === item._id) {
-                                    setShowPreview(false);
-                                }
-                            }}
-
-
-                            
-
-
-
                             style={{
                                 border: '1px solid #eee', borderRadius: '12px', padding: '20px',
                                 textAlign: 'center', cursor: 'pointer', backgroundColor: isFolder ? '#fffbe6' : 'white',
@@ -272,7 +254,7 @@ const Home = () => {
                             {/* Action Buttons */}
 
                             <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', paddingTop: '10px', borderTop: '1px solid #f0f0f0' }}>
-                                {!isFolder && <FaShareAlt className="action-icon" color="#722ed1" title="Chia sẻ" onClick={(e) => { e.stopPropagation(); setShareFile(item); }} />}
+                                <FaShareAlt className="action-icon" color="#722ed1" title="Chia sẻ" onClick={(e) => { e.stopPropagation(); setShareFile(item); }} />
                                 <FaEdit className="action-icon" color="#1890ff" title="Đổi tên" onClick={(e) => handleRename(e, item._id || item.id, item.name || item.filename)} />
                                 {!isFolder && <FaDownload className="action-icon" color="#52c41a" title="Tải" onClick={(e) => handleDownload(e, item.s3Url, item.filename || item.name || "download")} />}
                                 <FaTrash className="action-icon" color="#ff4d4f" title="Xóa" onClick={(e) => handleDelete(e, item._id || item.id)} />

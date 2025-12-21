@@ -176,7 +176,7 @@ router.post("/set-visibility", requireAuth, async (req, res) => {
     }
 
     // ===== REMOVE EMAILS =====
-    if (removeEmails.length > 0) {
+    if (removeEmails.length > 0 && mode === "shared") {
       item.sharedWith = item.sharedWith.filter(
         (s) => !removeEmails.includes(s.userId)
       );
